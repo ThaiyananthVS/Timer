@@ -72,6 +72,11 @@
             color: white;
         }
 
+        #pauseButton {
+            background-color: #ffc107;
+            color: black;
+        }
+
         #resetButton {
             background-color: #dc3545;
             color: white;
@@ -111,6 +116,7 @@
         </div>
         <h2 id="timerDisplay">00:00:00</h2>
         <button id="startButton" onclick="startTimer()">Start</button>
+        <button id="pauseButton" onclick="pauseTimer()" disabled>Pause</button>
         <button id="resetButton" onclick="resetTimer()">Reset</button>
     </div>
 
@@ -123,23 +129,26 @@
     <script>
         let countdown;
         let totalSeconds = 0;
+        let isPaused = false;
 
         function startTimer() {
-            clearInterval(countdown); // Clear any previous timer
+            clearInterval(countdown); // Clear any existing timer
 
-            // Get time values from input fields
-            let hours = parseInt(document.getElementById("hours").value) || 0;
-            let minutes = parseInt(document.getElementById("minutes").value) || 0;
-            let seconds = parseInt(document.getElementById("seconds").value) || 0;
+            // Get input values
+            if (!isPaused) {
+                let hours = parseInt(document.getElementById("hours").value) || 0;
+                let minutes = parseInt(document.getElementById("minutes").value) || 0;
+                let seconds = parseInt(document.getElementById("seconds").value) || 0;
 
-            totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                totalSeconds = hours * 3600 + minutes * 60 + seconds;
 
-            if (totalSeconds <= 0) {
-                alert("Please enter a valid time!");
-                return;
+                if (totalSeconds <= 0) {
+                    alert("Please enter a valid time!");
+                    return;
+                }
             }
 
-            updateDisplay(hours, minutes, seconds);
+            updateDisplay();
 
             countdown = setInterval(() => {
                 if (totalSeconds <= 0) {
@@ -148,27 +157,37 @@
                     playSound();
                     return;
                 }
-
                 totalSeconds--;
-
-                let h = Math.floor(totalSeconds / 3600);
-                let m = Math.floor((totalSeconds % 3600) / 60);
-                let s = totalSeconds % 60;
-
-                updateDisplay(h, m, s);
+                updateDisplay();
             }, 1000);
+
+            isPaused = false;
+            document.getElementById("pauseButton").disabled = false;
+        }
+
+        function pauseTimer() {
+            clearInterval(countdown);
+            isPaused = true;
+            document.getElementById("pauseButton").disabled = true;
         }
 
         function resetTimer() {
             clearInterval(countdown);
+            totalSeconds = 0;
+            isPaused = false;
             document.getElementById("timerDisplay").innerText = "00:00:00";
             document.getElementById("hours").value = "";
             document.getElementById("minutes").value = "";
             document.getElementById("seconds").value = "";
             hidePopup();
+            document.getElementById("pauseButton").disabled = true;
         }
 
-        function updateDisplay(h, m, s) {
+        function updateDisplay() {
+            let h = Math.floor(totalSeconds / 3600);
+            let m = Math.floor((totalSeconds % 3600) / 60);
+            let s = totalSeconds % 60;
+
             document.getElementById("timerDisplay").innerText =
                 (h < 10 ? "0" + h : h) + ":" +
                 (m < 10 ? "0" + m : m) + ":" +
