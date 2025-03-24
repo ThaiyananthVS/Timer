@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,6 +18,7 @@
             align-items: center;
             flex-direction: column;
         }
+
         .container {
             background: rgba(255, 255, 255, 0.1);
             padding: 30px;
@@ -24,14 +26,17 @@
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(8px);
         }
+
         h1 {
             font-size: 28px;
             font-weight: 600;
             margin-bottom: 15px;
         }
+
         .input-group {
             margin: 20px 0;
         }
+
         input {
             width: 60px;
             padding: 8px;
@@ -42,9 +47,11 @@
             background: rgba(255, 255, 255, 0.2);
             color: white;
         }
+
         input::placeholder {
             color: rgba(255, 255, 255, 0.7);
         }
+
         button {
             padding: 12px 18px;
             margin: 8px;
@@ -55,28 +62,45 @@
             border-radius: 5px;
             transition: 0.3s;
         }
+
         button:hover {
             opacity: 0.8;
         }
-        #setButton {
-            background-color: #ffa500;
-            color: black;
-        }
+
         #startButton {
             background-color: #28a745;
             color: white;
         }
+
         #resetButton {
             background-color: #dc3545;
             color: white;
         }
+
         #timerDisplay {
             font-size: 48px;
             font-weight: 600;
             margin: 20px 0;
         }
+
+        /* Popup Styles */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 32px;
+            display: none;
+            z-index: 9999;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1>Countdown Timer</h1>
@@ -84,18 +108,26 @@
             <input type="number" id="hours" min="0" max="99" placeholder="HH">
             <input type="number" id="minutes" min="0" max="59" placeholder="MM">
             <input type="number" id="seconds" min="0" max="59" placeholder="SS">
-            <button id="setButton" onclick="setTimer()">Set Timer</button>
         </div>
         <h2 id="timerDisplay">00:00:00</h2>
-        <button id="startButton" onclick="startTimer()" disabled>Start</button>
+        <button id="startButton" onclick="startTimer()">Start</button>
         <button id="resetButton" onclick="resetTimer()">Reset</button>
     </div>
+
+    <!-- Popup Message -->
+    <div id="popup" class="popup">⏳ Time's Up! ⏳</div>
+
+    <!-- Sound Alert -->
+    <audio id="alarmSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
 
     <script>
         let countdown;
         let totalSeconds = 0;
 
-        function setTimer() {
+        function startTimer() {
+            clearInterval(countdown); // Clear any previous timer
+
+            // Get time values from input fields
             let hours = parseInt(document.getElementById("hours").value) || 0;
             let minutes = parseInt(document.getElementById("minutes").value) || 0;
             let seconds = parseInt(document.getElementById("seconds").value) || 0;
@@ -107,21 +139,13 @@
                 return;
             }
 
-            document.getElementById("timerDisplay").innerText = 
-                (hours < 10 ? "0" + hours : hours) + ":" +
-                (minutes < 10 ? "0" + minutes : minutes) + ":" +
-                (seconds < 10 ? "0" + seconds : seconds);
-            
-            document.getElementById("startButton").disabled = false; // Enable Start button
-        }
-
-        function startTimer() {
-            clearInterval(countdown); // Clear any previous timer
+            updateDisplay(hours, minutes, seconds);
 
             countdown = setInterval(() => {
                 if (totalSeconds <= 0) {
                     clearInterval(countdown);
-                    alert("Time's up!");
+                    showPopup();
+                    playSound();
                     return;
                 }
 
@@ -131,10 +155,7 @@
                 let m = Math.floor((totalSeconds % 3600) / 60);
                 let s = totalSeconds % 60;
 
-                document.getElementById("timerDisplay").innerText = 
-                    (h < 10 ? "0" + h : h) + ":" + 
-                    (m < 10 ? "0" + m : m) + ":" + 
-                    (s < 10 ? "0" + s : s);
+                updateDisplay(h, m, s);
             }, 1000);
         }
 
@@ -144,8 +165,32 @@
             document.getElementById("hours").value = "";
             document.getElementById("minutes").value = "";
             document.getElementById("seconds").value = "";
-            document.getElementById("startButton").disabled = true; // Disable Start button again
+            hidePopup();
+        }
+
+        function updateDisplay(h, m, s) {
+            document.getElementById("timerDisplay").innerText =
+                (h < 10 ? "0" + h : h) + ":" +
+                (m < 10 ? "0" + m : m) + ":" +
+                (s < 10 ? "0" + s : s);
+        }
+
+        function showPopup() {
+            const popup = document.getElementById("popup");
+            popup.style.display = "block";
+            setTimeout(hidePopup, 5000); // Hide popup after 5 seconds
+        }
+
+        function hidePopup() {
+            document.getElementById("popup").style.display = "none";
+        }
+
+        function playSound() {
+            const sound = document.getElementById("alarmSound");
+            sound.play();
         }
     </script>
+
 </body>
+
 </html>
